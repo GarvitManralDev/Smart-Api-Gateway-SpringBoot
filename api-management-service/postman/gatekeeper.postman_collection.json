@@ -1,0 +1,774 @@
+{
+  "info": {
+    "name": "Gatekeeper API Management",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Public. Saves the token into platformToken / tenantToken / gatewayToken based on the returned role."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const res = pm.response.json();",
+                  "    const vars = { PLATFORM_ADMIN: 'platformToken', TENANT_ADMIN: 'tenantToken', GATEWAY_SERVICE: 'gatewayToken' };",
+                  "    const role = (res.role || '').replace(/^ROLE_/, '');",
+                  "    const key = vars[role];",
+                  "    if (key) {",
+                  "        pm.collectionVariables.set(key, res.token);",
+                  "        console.log('Saved token to ' + key);",
+                  "    }",
+                  "    if (res.organizationId) pm.collectionVariables.set('organizationId', res.organizationId);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Platform - Organizations",
+      "item": [
+        {
+          "name": "Create Organization",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/platform/organizations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "platform",
+                "organizations"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Acme Corp\",\n  \"slug\": \"acme-corp\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set('organizationId', pm.response.json().id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Organizations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/platform/organizations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "platform",
+                "organizations"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Organization",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/platform/organizations/{{organizationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "platform",
+                "organizations",
+                "{{organizationId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Organization",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/platform/organizations/{{organizationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "platform",
+                "organizations",
+                "{{organizationId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Acme Corp\",\n  \"slug\": \"acme-corp\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Change Organization Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/platform/organizations/{{organizationId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "platform",
+                "organizations",
+                "{{organizationId}}",
+                "status"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "status: PENDING | ACTIVE | SUSPENDED | DELETED"
+          }
+        },
+        {
+          "name": "Delete Organization",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/platform/organizations/{{organizationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "platform",
+                "organizations",
+                "{{organizationId}}"
+              ]
+            }
+          }
+        }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{platformToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "description": "Requires ROLE_PLATFORM_ADMIN."
+    },
+    {
+      "name": "Platform - Tenant Admin",
+      "item": [
+        {
+          "name": "Create Tenant Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/platform/organizations/{{organizationId}}/tenant-admin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "platform",
+                "organizations",
+                "{{organizationId}}",
+                "tenant-admin"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"acme-admin\",\n  \"password\": \"ChangeMe123\",\n  \"enabled\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get Tenant Admin",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/platform/organizations/{{organizationId}}/tenant-admin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "platform",
+                "organizations",
+                "{{organizationId}}",
+                "tenant-admin"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Tenant Admin",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/platform/organizations/{{organizationId}}/tenant-admin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "platform",
+                "organizations",
+                "{{organizationId}}",
+                "tenant-admin"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"acme-admin\",\n  \"password\": \"ChangeMe123\",\n  \"enabled\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete Tenant Admin",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/platform/organizations/{{organizationId}}/tenant-admin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "platform",
+                "organizations",
+                "{{organizationId}}",
+                "tenant-admin"
+              ]
+            }
+          }
+        }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{platformToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "description": "Requires ROLE_PLATFORM_ADMIN."
+    },
+    {
+      "name": "Tenant - Organization",
+      "item": [
+        {
+          "name": "Get Own Organization",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tenant/organization",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tenant",
+                "organization"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Own Organization",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tenant/organization",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tenant",
+                "organization"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Acme Corp Renamed\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{tenantToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "description": "Requires ROLE_TENANT_ADMIN."
+    },
+    {
+      "name": "Tenant - Routes",
+      "item": [
+        {
+          "name": "Create Route",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tenant/routes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tenant",
+                "routes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"routeId\": \"orders-api\",\n  \"name\": \"Orders API\",\n  \"pathPattern\": \"/acme-corp/orders/**\",\n  \"targetBaseUrl\": \"http://localhost:9000\",\n  \"targetPathPrefix\": \"/api/orders\",\n  \"requestsPerMinute\": 60,\n  \"responseTimeoutMs\": 5000,\n  \"idempotencyEnabled\": false,\n  \"active\": true,\n  \"allowedMethods\": [\n    \"GET\",\n    \"POST\"\n  ],\n  \"headerRules\": [\n    {\n      \"direction\": \"REQUEST\",\n      \"action\": \"ADD\",\n      \"headerName\": \"X-Source\",\n      \"headerValue\": \"gatekeeper\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const res = pm.response.json();",
+                  "    pm.collectionVariables.set('routeDbId', res.id);",
+                  "    pm.collectionVariables.set('routeId', res.routeId);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Routes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tenant/routes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tenant",
+                "routes"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Route",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tenant/routes/{{routeDbId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tenant",
+                "routes",
+                "{{routeDbId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Route",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tenant/routes/{{routeDbId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tenant",
+                "routes",
+                "{{routeDbId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"routeId\": \"orders-api\",\n  \"name\": \"Orders API\",\n  \"pathPattern\": \"/acme-corp/orders/**\",\n  \"targetBaseUrl\": \"http://localhost:9000\",\n  \"targetPathPrefix\": \"/api/orders\",\n  \"requestsPerMinute\": 60,\n  \"responseTimeoutMs\": 5000,\n  \"idempotencyEnabled\": false,\n  \"active\": true,\n  \"allowedMethods\": [\n    \"GET\",\n    \"POST\"\n  ],\n  \"headerRules\": [\n    {\n      \"direction\": \"REQUEST\",\n      \"action\": \"ADD\",\n      \"headerName\": \"X-Source\",\n      \"headerValue\": \"gatekeeper\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Change Route Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tenant/routes/{{routeDbId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tenant",
+                "routes",
+                "{{routeDbId}}",
+                "status"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"active\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete Route",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tenant/routes/{{routeDbId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tenant",
+                "routes",
+                "{{routeDbId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Route Versions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tenant/route-versions/{{routeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tenant",
+                "route-versions",
+                "{{routeId}}"
+              ]
+            },
+            "description": "Uses the string routeId (e.g. orders-api), not the numeric id."
+          }
+        },
+        {
+          "name": "Get Audit Records",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tenant/audit-records",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tenant",
+                "audit-records"
+              ]
+            }
+          }
+        }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{tenantToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "description": "Requires ROLE_TENANT_ADMIN."
+    },
+    {
+      "name": "Gateway",
+      "item": [
+        {
+          "name": "Get Active Routes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/gateway/routes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "gateway",
+                "routes"
+              ]
+            }
+          }
+        }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{gatewayToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "description": "Requires ROLE_GATEWAY_SERVICE."
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8081",
+      "type": "string"
+    },
+    {
+      "key": "username",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "password",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "platformToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "tenantToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "gatewayToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "organizationId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "routeDbId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "routeId",
+      "value": "orders-api",
+      "type": "string"
+    }
+  ]
+}

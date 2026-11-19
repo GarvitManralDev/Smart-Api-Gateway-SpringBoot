@@ -13,6 +13,7 @@ import in.garvit.gatekeeper.management.repository.ControlPlaneAuditRecordReposit
 import in.garvit.gatekeeper.management.repository.RouteConfigurationVersionRepository;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
 
@@ -20,6 +21,7 @@ import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.*;
 
+@Service
 public class RouteService {
     private final ApiRouteRepository apiRouteRepository;
     private final RouteConfigurationVersionRepository versionRepository;
